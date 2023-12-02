@@ -27,9 +27,17 @@ const getUser = AsyncError(async (req, res, next) => {
 });
 
 const updateProfilePhoto = AsyncError(async (req, res, next) => {
+  const user = req.user.id
   const image = await cloudinary.uploader.upload(req.file.path)
-  console.log(req.file.path, 'uploaded')
-  // res.json({ sucess: true, messaage: "User Profile", user });
+
+  const updateUserPhoto = await User.findByIdAndUpdate(
+    req.user.id, 
+    {$set: req.body}
+  )
+  if (!updateUserPhoto) {
+    return next(new AppError("Unable to change your photo now"));
+  }
+  res.json(updateUserPhoto);
 });
 
 const updateUserData = AsyncError(async (req, res, next) => {

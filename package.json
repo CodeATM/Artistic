@@ -4,7 +4,7 @@
   "description": "a social app",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "app.js"
   },
   "author": "cyberATM",
   "license": "ISC",
