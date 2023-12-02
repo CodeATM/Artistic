@@ -25,7 +25,7 @@ app.use(multer({storage}).single('image'))
 
 
 mongoose
-  .connect("mongodb://localhost:27017/Artistic", {
+  .connect(process.env.MONGODB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
