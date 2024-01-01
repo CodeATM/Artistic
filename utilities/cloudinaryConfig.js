@@ -1,24 +1,25 @@
-const cloudinary = require('cloudinary').v2;
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const AppError = require("../utils/ErrorHandler");
+const AsyncError = require("../utils/AsyncError");
 
-// Configure Cloudinary with your credentials
 cloudinary.config({
-  cloud_name: 'ds2nijbki',
-  api_key: '464441599452541',
-  api_secret: 'H1xsbYIXLJUQ3YZ6d3xw9OY4NT0', 
+  cloud_name: process.env.CLOUDDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const uploadToCloudinary = async (imagePath) => {
+  try {
+    const result = await cloudinary.uploader.upload(imagePath);
 
-// Reusable function for uploading images to Cloudinary
-const uploadToCloudinary = (file, folder = 'uploads') => {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream({ folder: folder }, (error, result) => {
-      if (error) {
-        reject('Error uploading image to Cloudinary');
-      } else {
-        resolve(result.secure_url);
-      }
-    }).end(file.buffer);
-  });
+    // Return the Cloudinary result
+    return result.secure_url;
+  } catch (error) {
+    // Handle errors and return an error object
+    console.log(error);
+    return new AppError("Error uploading image to Cloudinary", 500);
+  }
 };
 
-module.exports = { upload, uploadToCloudinary };
+module.exports = { uploadToCloudinary };

@@ -4,6 +4,7 @@ const AsyncError = require("../utilities/AsyncError");
 const Story = require("../Models/storyModel");
 const Chapter = require("../Models/ChapterModel");
 const Filtering = require("../utilities/Filtering");
+const uploadToCloudinary = require('../utilities/cloudinaryConfig')
 
 const getStories = AsyncError(async (req, res, next) => {
   const features = new Filtering(Story.find(), req.query)
@@ -17,6 +18,7 @@ const getStories = AsyncError(async (req, res, next) => {
 });
 
 const getUserStories = AsyncError(async (req, res, next) => {
+
   const user = req.user;
 
   const story = await Story.find({ author: user });
@@ -47,13 +49,14 @@ const getStory = AsyncError(async (req, res, next) => {
 });
 
 const createStory = AsyncError(async (req, res, next) => {
-  const user = req.user
-
-  // if (user.isWriter == false) {
-  //   return next(new AppError("This user is not a writer.Please update your profile to a writer's profile"));
-  // }
-
+  if (req.user.isWriter == false) {
+    return next(new AppError("This user is not a writer.Please update your profile to a writer's profile"));
+  }
   const { title, category, description, age} = req.body;
+  const imagePath = req.file.path;
+
+  const image = await uploadToCloudinary(imagePath)
+
 
   const story = await Story.create({
     title,
@@ -61,8 +64,9 @@ const createStory = AsyncError(async (req, res, next) => {
     description,
     age,
     author: req.user.id,
+    storyBanner:image
   });
-  res.json({ sucess: true, messaage: "Story created successfuly" });
+  res.json({ sucess: true, messaage: "Story created successfuly", story});
 });
 
 const editStory = AsyncError(async (req, res, next) => {

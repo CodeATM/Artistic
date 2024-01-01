@@ -2,17 +2,7 @@ const express = require("express");
 const AppError = require("../utilities/ErrorHandler");
 const AsyncError = require("../utilities/AsyncError");
 const User = require("../Models/userModel");
-
-
-const cloudinary = require('cloudinary').v2;
-
-// Configure Cloudinary with your credentials
-cloudinary.config({
-  cloud_name: process.env.CLOUDDINARY_NAME ,
-  api_key: process.env.CLOUDINARY_API-KEY,
-  api_secret: process.env.CLOUDINARY_API-SECRET,
-});
-
+const uploadToCloudinary = require('../utilities/cloudinaryConfig')
 
 const getUser = AsyncError(async (req, res, next) => {
   const user = await User.findById(req.user.id);
@@ -27,17 +17,27 @@ const getUser = AsyncError(async (req, res, next) => {
 });
 
 const updateProfilePhoto = AsyncError(async (req, res, next) => {
-  const user = req.user.id
-  const image = await cloudinary.uploader.upload(req.file.path)
+    // const user = req.user.id
+    const user = await User.findById(req.user.id)
+    if (!user) {
+        return next(new AppError("User not found", 404));
+    }
 
-  const updateUserPhoto = await User.findByIdAndUpdate(
-    req.user.id, 
-    {$set: req.body}
-  )
-  if (!updateUserPhoto) {
-    return next(new AppError("Unable to change your photo now"));
-  }
-  res.json(updateUserPhoto);
+    if (!req.file.path) {
+        return next(new AppError("No file uploaded", 404));
+    }
+
+    const imagePath = req.file.path;
+
+    const image = await uploadToCloudinary(imagePath)
+
+    console.log(image)
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user.id, // use req.user.id directly
+        { $set: { profileImage: image } },
+        { new: true }
+    );
+    res.json({ sucess: true, messaage: "Image uploaded",updatedUser});
 });
 
 const updateUserData = AsyncError(async (req, res, next) => {
