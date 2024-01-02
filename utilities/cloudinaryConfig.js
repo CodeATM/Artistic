@@ -1,7 +1,7 @@
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
-const AppError = require("../utils/ErrorHandler");
-const AsyncError = require("../utils/AsyncError");
+const AppError = require("./ErrorHandler");
+const AsyncError = require("./AsyncError");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDDINARY_NAME,
@@ -11,7 +11,7 @@ cloudinary.config({
 
 const uploadToCloudinary = async (imagePath) => {
   try {
-    const result = await cloudinary.uploader.upload(imagePath);
+    const result = await cloudinary.uploader.upload(imagePath);40137683700
 
     // Return the Cloudinary result
     return result.secure_url;
